@@ -8,11 +8,11 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Formatura em Medicina · Dra. Caroline">
 <meta property="og:locale" content="pt_BR">
-<meta property="og:url" content="https://cerimonialconvite.github.io/formatura-medicina-caroline/">
+<meta property="og:url" content="https://cerimonialconvite.github.io/Baile-de-Medicina-Caroline/">
 <meta property="og:title" content="Formatura em Medicina · Dra. Caroline">
 <meta property="og:description" content="Sábado, 16 de janeiro de 2027 · 21h · Cerimonial Caminho das Árvores">
-<meta property="og:image" content="https://cerimonialconvite.github.io/formatura-medicina-caroline/img/og.jpg">
-<meta property="og:image:secure_url" content="https://cerimonialconvite.github.io/formatura-medicina-caroline/img/og.jpg">
+<meta property="og:image" content="https://cerimonialconvite.github.io/Baile-de-Medicina-Caroline/img/og.jpg">
+<meta property="og:image:secure_url" content="https://cerimonialconvite.github.io/Baile-de-Medicina-Caroline/img/og.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -49,6 +49,9 @@
   /* ---------- página ---------- */
   .pagina{position:relative;width:min(100vw,540px);margin:0 auto;aspect-ratio:1080/7874;background:var(--verde);overflow:hidden;box-shadow:0 0 60px rgba(0,0,0,.6)}
   .fundo{position:absolute;left:0;width:100%;display:block}
+  .patch{position:absolute;display:block;height:auto;opacity:0;transition:opacity .7s ease;pointer-events:none}
+  .patch.on{opacity:1}
+  .el.feito,#brasao.feito{visibility:hidden}
   .el{position:absolute;display:block;height:auto}
   .el img{display:block;width:100%;height:auto}
   img.el{pointer-events:none;user-select:none}
@@ -190,6 +193,7 @@
 
 <main class="pagina" id="pagina">
   <img class="fundo" src="img/fundo1.jpg" alt="" style="top:0.0000%;height:25.4001%"><img class="fundo" src="img/fundo2.jpg" alt="" style="top:25.4001%;height:25.4001%"><img class="fundo" src="img/fundo3.jpg" alt="" style="top:50.8001%;height:25.4001%"><img class="fundo" src="img/fundo4.jpg" alt="" style="top:76.2002%;height:23.7998%">
+  <img class="patch" data-apos="g0" src="img/arte_g0.jpg" alt="" style="left:0.0000%;top:0.0000%;width:100.0000%"><img class="patch" data-apos="g1" src="img/arte_g1.jpg" alt="" style="left:0.0000%;top:25.0191%;width:100.0000%"><img class="patch" data-apos="g2" src="img/arte_g2.jpg" alt="" style="left:2.3148%;top:44.7676%;width:95.3704%"><img class="patch" data-apos="g3" src="img/arte_g3.jpg" alt="" style="left:15.7407%;top:50.9906%;width:68.7037%"><img class="patch" data-apos="g4" src="img/arte_g4.jpg" alt="" style="left:26.3889%;top:63.6017%;width:47.2222%"><img class="patch" data-apos="g5" src="img/arte_g5.jpg" alt="" style="left:11.1111%;top:67.8816%;width:77.7778%"><img class="patch" data-apos="g6" src="img/arte_g6.jpg" alt="" style="left:11.1111%;top:72.0091%;width:78.2407%"><img class="patch" data-apos="g8,g9" src="img/arte_g8g9.jpg" alt="" style="left:0.0000%;top:87.9477%;width:100.0000%">
 
   <div id="brasao" style="left:33.6111%;top:16.8910%;width:33.3333%" role="img" aria-label="Brasão CCV">
     <svg viewBox="66.92 46.17 171.39 187.18" xmlns="http://www.w3.org/2000/svg">
@@ -347,6 +351,24 @@
     lista.forEach(function(o,i){ o.p.style.setProperty('--t',(i/lista.length*0.9).toFixed(3)+'s'); });
   })();
 
+  /* ===== ARTE ORIGINAL: quando o grupo termina de animar, a arte exata entra por baixo
+     (sem recorte aparente) e as peças animadas saem ===== */
+  var terminados={};
+  function agendarArte(g,ms){
+    var maxd=0; document.querySelectorAll('[data-g="'+g+'"]').forEach(function(el){ var d=parseFloat(el.style.getPropertyValue('--d'))||0; if(d>maxd) maxd=d; });
+    setTimeout(function(){ terminados[g]=1; aplicarArte(); }, semMov?0:(ms||maxd+3700));
+  }
+  function aplicarArte(){
+    document.querySelectorAll('.patch:not(.on)').forEach(function(p){
+      var gs=p.dataset.apos.split(','); if(!gs.every(function(g){return terminados[g];})) return;
+      p.classList.add('on');
+      setTimeout(function(){
+        gs.forEach(function(g){ document.querySelectorAll('[data-g="'+g+'"]').forEach(function(el){ if(!el.classList.contains('icone')) el.classList.add('feito'); }); });
+        if(gs.indexOf('g0')>=0) brasao.classList.add('feito');
+      },800);
+    });
+  }
+
   /* ===== ENTRADAS POR GRUPO AO ROLAR ===== */
   function iniciarEntradas(){
     var grupos={};
@@ -354,10 +376,12 @@
     // topo: foto + brasão + frase entram juntos na abertura
     grupos.g0.forEach(function(el){ el.classList.add('on'); }); grupos.g0._ok=1;
     setTimeout(function(){ brasao.classList.add('on'); },500);
+    agendarArte('g0',6200);
     var fila=[], ocupado=false;
     function liga(g){ fila.push(g); if(!ocupado) proximo(); }
     function proximo(){ var g=fila.shift(); if(!g){ocupado=false;return;} ocupado=true;
       grupos[g].forEach(function(el){ el.classList.add('on'); });
+      agendarArte(g);
       if(g==='g7') rolarNumeros();
       setTimeout(proximo,550);
     }
